@@ -4,11 +4,14 @@ using Azure.AI.OpenAI;
 using Azure.Core;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+using System.Text.Json.Serialization;
 
 static class Program
 {
     static readonly string cluEndpoint;             // MOCHI_CLU_ENDPOINT
     static readonly string cluKey;                  // MOCHI_CLU_KEY
+    static readonly string cluProjectName;          // MOCHI_CLU_PROJECT_NAME
+    static readonly string cluDeploymentName;       // MOCHI_CLU_DEPLOYMENT_NAME
     static readonly string openAiEndpoint;          // MOCHI_AI_ENDPOINT
     static readonly string openAiKey;               // MOCHI_AI_KEY
     static readonly string openAiModelOrDeployment; // MOCHI_AI_MODEL
@@ -18,19 +21,21 @@ static class Program
     static readonly SpeechSynthesizer synthetizer;
     static readonly SpeechRecognizer recognizer;
 
-    static readonly ConversationAnalysisClient conversationClient;
+    static readonly ConversationAnalysisClient cluClient;
     static readonly OpenAIClient aiClient;
 
-    static readonly AudioConfig audioConfig;
     static readonly KeywordRecognizer keywordRecognizer;
     static readonly KeywordRecognitionModel keywordModel;
 
-    static string currentPersona = "You are a cat.";
+    static string currentPersona = "a cat";
+    static ChatCompletionsOptions prompt = new ChatCompletionsOptions();
 
     static Program()
     {
         cluEndpoint = ReadConfigurationSetting("MOCHI_CLU_ENDPOINT");
         cluKey = ReadConfigurationSetting("MOCHI_CLU_KEY");
+        cluProjectName = ReadConfigurationSetting("MOCHI_CLU_PROJECT_NAME");
+        cluDeploymentName = ReadConfigurationSetting("MOCHI_CLU_DEPLOYMENT_NAME");
 
         openAiEndpoint = ReadConfigurationSetting("MOCHI_AI_ENDPOINT");
         openAiKey = ReadConfigurationSetting("MOCHI_AI_KEY");
@@ -44,18 +49,20 @@ static class Program
         synthetizer = new SpeechSynthesizer(speechConfiguration);
         recognizer = new SpeechRecognizer(speechConfiguration);
 
-        conversationClient = new ConversationAnalysisClient(new Uri(cluEndpoint), new AzureKeyCredential(cluKey));
+        cluClient = new ConversationAnalysisClient(new Uri(cluEndpoint), new AzureKeyCredential(cluKey));
         aiClient = new OpenAIClient(new Uri(openAiEndpoint), new AzureKeyCredential(openAiKey));
-        audioConfig = AudioConfig.FromDefaultMicrophoneInput();
-        keywordRecognizer = new KeywordRecognizer(audioConfig);
+
+        keywordRecognizer = new KeywordRecognizer(AudioConfig.FromDefaultMicrophoneInput());
         keywordModel = KeywordRecognitionModel.FromFile("hey_mochi.table");
     }
+
+    static ChatMessage SystemMessage => new ChatMessage(ChatRole.System, $"You are {currentPersona}. Answer with short responses; around 3 sentences.");
 
     static async Task Main(string[] args)
     {
     start:
-        var prompt = new ChatCompletionsOptions();
-        prompt.Messages.Add(new ChatMessage(ChatRole.System, currentPersona + " Answer with short responses; around 3 sentences."));
+        prompt.Messages.Clear();
+        prompt.Messages.Add(SystemMessage);
         int totalLength = 0;
 
         while (true)
@@ -109,14 +116,14 @@ static class Program
             },
             parameters = new
             {
-                projectName = "mochi",
-                deploymentName = "mochiclu",
+                projectName = cluProjectName,
+                deploymentName = cluDeploymentName,
                 stringIndexType = "Utf16CodeUnit",
             },
             kind = "Conversation",
         };
 
-        var response = await conversationClient.AnalyzeConversationAsync(RequestContent.Create(request));
+        var response = await cluClient.AnalyzeConversationAsync(RequestContent.Create(request));
         dynamic content = response.Content.ToDynamicFromJson();
 
         var confidence = (float)content.result.prediction.intents[0].confidenceScore;
@@ -132,8 +139,11 @@ static class Program
                 await synthetizer.SpeakTextAsync("It's " + DateTimeOffset.Now.ToString("t"));
                 break;
             case "ChangePersona":
-                var newPersona = entities[0].text;
-                if (entities.Length>0) currentPersona = $"You are {newPersona}.";
+                var newPersona = entities[0].Text;
+                if (entities.Length<1) throw new NotImplementedException();
+                currentPersona = newPersona;
+                prompt.Messages[0] = SystemMessage;
+                await synthetizer.SpeakTextAsync($"I am {newPersona}"); ;
                 break;
             default: throw new NotImplementedException();
         }
@@ -155,6 +165,8 @@ static class Program
 
 struct Entity
 {
-    public string category { get; set; }
-    public string text { get; set; }
+    [JsonPropertyName("category")]
+    public string Category { get; set; }
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
 }
