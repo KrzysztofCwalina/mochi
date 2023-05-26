@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mochi", "mochi\mochi.csproj", "{1E95117D-A981-4A3B-A242-4AB0769CF422}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1E95117D-A981-4A3B-A242-4AB0769CF422}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E95117D-A981-4A3B-A242-4AB0769CF422}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E95117D-A981-4A3B-A242-4AB0769CF422}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E95117D-A981-4A3B-A242-4AB0769CF422}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {58DD7F01-9951-47B0-A4D4-152DF17733F3}
+	EndGlobalSection
+EndGlobal

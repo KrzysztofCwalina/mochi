@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	  <PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+	  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.AI.Language.Conversations" Version="1.0.0" />
+		<PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.5" />
+		<PackageReference Include="Azure.Core.Experimental" Version="0.1.0-preview.27" />
+		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.28.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="hey_mochi.table">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+</Project>
