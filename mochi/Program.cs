@@ -7,14 +7,13 @@ using Microsoft.CognitiveServices.Speech.Audio;
 
 static class Program
 {
-    static readonly string cluEndpoint;
-    static readonly string cluKey;
-    static readonly string openAiEndpoint;
-    static readonly string openAiKey;
-    static readonly string speechEndpoint;
-    static readonly string speechKey;
-
-    static readonly string openAiModelOrDeployment;
+    static readonly string cluEndpoint;             // MOCHI_CLU_ENDPOINT
+    static readonly string cluKey;                  // MOCHI_CLU_KEY
+    static readonly string openAiEndpoint;          // MOCHI_AI_ENDPOINT
+    static readonly string openAiKey;               // MOCHI_AI_KEY
+    static readonly string openAiModelOrDeployment; // MOCHI_AI_MODEL
+    static readonly string speechEndpoint;          // MOCHI_SPEECH_ENDPOINT
+    static readonly string speechKey;               // MOCHI_SPEECH_KEY
 
     static readonly SpeechSynthesizer synthetizer;
     static readonly SpeechRecognizer recognizer;
@@ -30,16 +29,15 @@ static class Program
 
     static Program()
     {
-        cluEndpoint = Environment.GetEnvironmentVariable("MOCHI_CLU_ENDPOINT");
-        if (cluEndpoint == null) Console.WriteLine("MOCHI_CLU_ENDPOINT not set.");
+        cluEndpoint = ReadConfigurationSetting("MOCHI_CLU_ENDPOINT");
+        cluKey = ReadConfigurationSetting("MOCHI_CLU_KEY");
 
-        cluKey = Environment.GetEnvironmentVariable("MOCHI_CLU_KEY");
-        openAiEndpoint = Environment.GetEnvironmentVariable("MOCHI_AI_ENDPOINT");
-        openAiKey = Environment.GetEnvironmentVariable("MOCHI_AI_KEY");
-        openAiModelOrDeployment = Environment.GetEnvironmentVariable("MOCHI_AI_MODEL");
+        openAiEndpoint = ReadConfigurationSetting("MOCHI_AI_ENDPOINT");
+        openAiKey = ReadConfigurationSetting("MOCHI_AI_KEY");
+        openAiModelOrDeployment = ReadConfigurationSetting("MOCHI_AI_MODEL");
 
-        speechEndpoint = Environment.GetEnvironmentVariable("MOCHI_SPEECH_ENDPOINT");
-        speechKey = Environment.GetEnvironmentVariable("MOCHI_SPEECH_KEY");
+        speechEndpoint = ReadConfigurationSetting("MOCHI_SPEECH_ENDPOINT");
+        speechKey = ReadConfigurationSetting("MOCHI_SPEECH_KEY");
 
         var speechConfiguration = SpeechConfig.FromEndpoint(new Uri(speechEndpoint), speechKey);
         speechConfiguration.SpeechSynthesisVoiceName = "en-US-JaneNeural";
@@ -141,6 +139,17 @@ static class Program
         }
 
         return true;
+    }
+
+    static string ReadConfigurationSetting(string settingName)
+    {
+        var value = Environment.GetEnvironmentVariable(settingName);
+        if (value == null)
+        {
+            Console.WriteLine($"{settingName} not set.");
+            Environment.Exit(0);
+        }
+        return value;
     }
 }
 
