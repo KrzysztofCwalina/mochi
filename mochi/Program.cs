@@ -7,32 +7,50 @@ using Microsoft.CognitiveServices.Speech.Audio;
 
 static class Program
 {
-    static string cluEndpoint = "";
-    static string cluKey = "";
-    static string openAiEndpoint = "";
-    static string openAiKey = "";
-    static string speechEndpoint = "";
-    static string speechKey = "";
+    static readonly string cluEndpoint;
+    static readonly string cluKey;
+    static readonly string openAiEndpoint;
+    static readonly string openAiKey;
+    static readonly string speechEndpoint;
+    static readonly string speechKey;
 
-    static string openAiModelOrDeployment = "krystofgpt4";
+    static readonly string openAiModelOrDeployment;
 
-    readonly static SpeechSynthesizer synthetizer;
-    readonly static SpeechRecognizer recognizer;
+    static readonly SpeechSynthesizer synthetizer;
+    static readonly SpeechRecognizer recognizer;
 
-    static readonly ConversationAnalysisClient conversation = new ConversationAnalysisClient(new Uri(cluEndpoint), new AzureKeyCredential(cluKey));
-    static readonly OpenAIClient ai = new OpenAIClient(new Uri(openAiEndpoint), new AzureKeyCredential(openAiKey));
+    static readonly ConversationAnalysisClient conversationClient;
+    static readonly OpenAIClient aiClient;
 
-    static readonly AudioConfig audioConfig = AudioConfig.FromDefaultMicrophoneInput();
-    static readonly KeywordRecognizer keywordRecognizer = new KeywordRecognizer(audioConfig);
-    static readonly KeywordRecognitionModel keywordModel = KeywordRecognitionModel.FromFile("hey_mochi.table");
+    static readonly AudioConfig audioConfig;
+    static readonly KeywordRecognizer keywordRecognizer;
+    static readonly KeywordRecognitionModel keywordModel;
+
     static string currentPersona = "You are a cat.";
 
     static Program()
     {
+        cluEndpoint = Environment.GetEnvironmentVariable("MOCHI_CLU_ENDPOINT");
+        if (cluEndpoint == null) Console.WriteLine("MOCHI_CLU_ENDPOINT not set.");
+
+        cluKey = Environment.GetEnvironmentVariable("MOCHI_CLU_KEY");
+        openAiEndpoint = Environment.GetEnvironmentVariable("MOCHI_AI_ENDPOINT");
+        openAiKey = Environment.GetEnvironmentVariable("MOCHI_AI_KEY");
+        openAiModelOrDeployment = Environment.GetEnvironmentVariable("MOCHI_AI_MODEL");
+
+        speechEndpoint = Environment.GetEnvironmentVariable("MOCHI_SPEECH_ENDPOINT");
+        speechKey = Environment.GetEnvironmentVariable("MOCHI_SPEECH_KEY");
+
         var speechConfiguration = SpeechConfig.FromEndpoint(new Uri(speechEndpoint), speechKey);
         speechConfiguration.SpeechSynthesisVoiceName = "en-US-JaneNeural";
         synthetizer = new SpeechSynthesizer(speechConfiguration);
         recognizer = new SpeechRecognizer(speechConfiguration);
+
+        conversationClient = new ConversationAnalysisClient(new Uri(cluEndpoint), new AzureKeyCredential(cluKey));
+        aiClient = new OpenAIClient(new Uri(openAiEndpoint), new AzureKeyCredential(openAiKey));
+        audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+        keywordRecognizer = new KeywordRecognizer(audioConfig);
+        keywordModel = KeywordRecognitionModel.FromFile("hey_mochi.table");
     }
 
     static async Task Main(string[] args)
@@ -44,7 +62,6 @@ static class Program
 
         while (true)
         {
-            Console.Clear();
             Console.WriteLine(currentPersona);
             Console.WriteLine("waiting ...");
 
@@ -53,6 +70,7 @@ static class Program
             Console.WriteLine("listening ...");
             SpeechRecognitionResult recognized = await recognizer.RecognizeOnceAsync();
             var recognizedText = recognized.Text;
+            Console.WriteLine(recognizedText);
 
             if (string.IsNullOrEmpty(recognizedText)) continue;
 
@@ -64,7 +82,7 @@ static class Program
             prompt.Messages.Add(new ChatMessage(ChatRole.User, recognizedText));
             totalLength += recognizedText.Length;
 
-            ChatCompletions completions = await ai.GetChatCompletionsAsync(openAiModelOrDeployment, prompt);
+            ChatCompletions completions = await aiClient.GetChatCompletionsAsync(openAiModelOrDeployment, prompt);
 
             var response = completions.Choices.First().Message.Content;
 
@@ -100,21 +118,24 @@ static class Program
             kind = "Conversation",
         };
 
-        var response = await conversation.AnalyzeConversationAsync(RequestContent.Create(request));
+        var response = await conversationClient.AnalyzeConversationAsync(RequestContent.Create(request));
         dynamic content = response.Content.ToDynamicFromJson();
 
         var confidence = (float)content.result.prediction.intents[0].confidenceScore;
         if (confidence < 0.8) return false;
 
         var entities = (Entity[])content.result.prediction.entities;
-        switch ((string)content.result.prediction.topIntent)
+        var intent = (string)content.result.prediction.topIntent;
+        Console.WriteLine(intent);
+        switch (intent)
         {
             case "None": return false;
             case "GetTime":
                 await synthetizer.SpeakTextAsync("It's " + DateTimeOffset.Now.ToString("t"));
                 break;
             case "ChangePersona":
-                if (entities.Length>0) currentPersona = $"You are {entities[0].text}.";
+                var newPersona = entities[0].text;
+                if (entities.Length>0) currentPersona = $"You are {newPersona}.";
                 break;
             default: throw new NotImplementedException();
         }
