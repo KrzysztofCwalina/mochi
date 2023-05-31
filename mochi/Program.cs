@@ -71,6 +71,7 @@ static class Program
             Console.WriteLine("waiting ...");
 
             KeywordRecognitionResult keyword = await keywordRecognizer.RecognizeOnceAsync(keywordModel);
+            await synthetizer.StopSpeakingAsync();
 
             Console.WriteLine("listening ...");
             SpeechRecognitionResult recognized = await recognizer.RecognizeOnceAsync();
@@ -97,7 +98,7 @@ static class Program
             if (totalLength > 1000) goto start;
 
             Console.WriteLine("speaking ...");
-            await synthetizer.SpeakTextAsync(response);
+            synthetizer.SpeakTextAsync(response);
         }
     }
 
@@ -139,8 +140,8 @@ static class Program
                 await synthetizer.SpeakTextAsync("It's " + DateTimeOffset.Now.ToString("t"));
                 break;
             case "ChangePersona":
+                if(entities.Length < 1) return false;
                 var newPersona = entities[0].Text;
-                if (entities.Length<1) throw new NotImplementedException();
                 currentPersona = newPersona;
                 prompt.Messages[0] = SystemMessage;
                 await synthetizer.SpeakTextAsync($"I am {newPersona}"); ;
