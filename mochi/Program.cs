@@ -26,7 +26,7 @@ static class Program
 
     static readonly KeywordRecognizer keywordRecognizer;
     static readonly KeywordRecognitionModel keywordModel;
-;
+
     static Prompt prompt = new Prompt(CreatePersonaMessage("a cat"));
 
     static ChatMessage CreatePersonaMessage(string persona)
@@ -135,8 +135,6 @@ static class Program
                 if(entities.Length < 1) return false;
                 var newPersona = entities[0].Text;
                 if (entities.Length<1) throw new NotImplementedException();
-                currentPersona = newPersona;
-                prompt.Messages[0] = SystemMessage;
                 await synthetizer.SpeakTextAsync($"I am {newPersona}"); ;
                 break;
             default: throw new NotImplementedException();
