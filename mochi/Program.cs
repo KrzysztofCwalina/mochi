@@ -26,9 +26,13 @@ static class Program
 
     static readonly KeywordRecognizer keywordRecognizer;
     static readonly KeywordRecognitionModel keywordModel;
+;
+    static Prompt prompt = new Prompt(CreatePersonaMessage("a cat"));
 
-    static string currentPersona = "a cat";
-    static ChatCompletionsOptions prompt = new ChatCompletionsOptions();
+    static ChatMessage CreatePersonaMessage(string persona)
+    {
+        return new ChatMessage(ChatRole.System, $"You are {persona}. Answer with short responses; around 3 sentences.");
+    }
 
     static Program()
     {
@@ -56,18 +60,10 @@ static class Program
         keywordModel = KeywordRecognitionModel.FromFile("hey_mochi.table");
     }
 
-    static ChatMessage SystemMessage => new ChatMessage(ChatRole.System, $"You are {currentPersona}. Answer with short responses; around 3 sentences.");
-
     static async Task Main(string[] args)
     {
-    start:
-        prompt.Messages.Clear();
-        prompt.Messages.Add(SystemMessage);
-        int totalLength = 0;
-
         while (true)
         {
-            Console.WriteLine(currentPersona);
             Console.WriteLine("waiting ...");
 
             KeywordRecognitionResult keyword = await keywordRecognizer.RecognizeOnceAsync(keywordModel);
@@ -85,17 +81,13 @@ static class Program
 
             Console.WriteLine("thinking ...");
 
-            prompt.Messages.Add(new ChatMessage(ChatRole.User, recognizedText));
-            totalLength += recognizedText.Length;
+            prompt.Add(new ChatMessage(ChatRole.User, recognizedText));
 
-            ChatCompletions completions = await aiClient.GetChatCompletionsAsync(openAiModelOrDeployment, prompt);
+            ChatCompletions completions = await aiClient.GetChatCompletionsAsync(openAiModelOrDeployment, prompt.CreateChatOptions());
 
             var response = completions.Choices.First().Message.Content;
 
-            prompt.Messages.Add(new ChatMessage(ChatRole.Assistant, response));
-            totalLength -= response.Length;
-
-            if (totalLength > 1000) goto start;
+            prompt.Add(new ChatMessage(ChatRole.Assistant, response));
 
             Console.WriteLine("speaking ...");
             synthetizer.SpeakTextAsync(response);
@@ -142,6 +134,7 @@ static class Program
             case "ChangePersona":
                 if(entities.Length < 1) return false;
                 var newPersona = entities[0].Text;
+                if (entities.Length<1) throw new NotImplementedException();
                 currentPersona = newPersona;
                 prompt.Messages[0] = SystemMessage;
                 await synthetizer.SpeakTextAsync($"I am {newPersona}"); ;
@@ -170,4 +163,28 @@ struct Entity
     public string Category { get; set; }
     [JsonPropertyName("text")]
     public string Text { get; set; }
+}
+
+class Prompt
+{
+    ChatCompletionsOptions _options;
+
+    public ChatCompletionsOptions CreateChatOptions() => _options;
+    
+    public Prompt(ChatMessage systemMessage)
+    {
+        if (systemMessage.Role != ChatRole.System) throw new ArgumentOutOfRangeException(nameof(systemMessage.Role));
+        _options.Messages.Add(systemMessage);
+    }
+    
+    internal void SetSystemMessage(ChatMessage systemMessage)
+    {
+        if (systemMessage.Role != ChatRole.System) throw new ArgumentOutOfRangeException(nameof(systemMessage.Role));
+        _options.Messages[0] = systemMessage;
+    }
+
+    internal void Add(ChatMessage message)
+    {
+        _options.Messages.Add(message);
+    }
 }
