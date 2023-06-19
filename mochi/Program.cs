@@ -1,13 +1,14 @@
 ﻿
-var clu = new Clu(typeof(Assistant));
-await clu.ExecuteAsync("How to make cookies?");
+var t2c = new TextToCode(typeof(Code));
 
-public static class Assistant
+while (true)
 {
-    public static void CookieReceipe()
-    {
-        Console.WriteLine("mix milk and flour");
-    }
-    public static void GetTime() => Console.WriteLine($"It's {DateTime.Now.ToString("t")}.");
+    var request = Console.ReadLine();
+    await t2c.ExecuteAsync(request);
+}
+
+public static class Code
+{
+    public static void GetTime() => Console.WriteLine($"It's {DateTime.Now.ToString("t")}");
     public static void DontUnderstand() => Console.WriteLine("I don't understand the request");
 }

@@ -8,13 +8,13 @@ using System.Text;
 
 static partial class Program
 {
-    public class Clu
+    public class TextToCode
     {
         AIServices ai = new AIServices();
         string _context;
-        public bool Confirm { get; set; } = true;
+        public bool Confirm { get; set; } = false;
 
-        public Clu(params Type[] actions)
+        public TextToCode(params Type[] actions)
         {
             string api = ExtractSchema(actions);
 
@@ -34,11 +34,21 @@ static partial class Program
                 schema.Append($"public class {type.Name} {{\n");
                 foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public))
                 {
-                    schema.Append($"\tpublic static {method.Name}();\n");
+                    schema.Append($"\tpublic static {method.Name}(");
+                    bool first = true;
+                    foreach(var parameter in method.GetParameters())
+                    {
+                        if (!first) schema.Append(", ");
+                        first = false;
+                        schema.Append(parameter.ParameterType.Name);
+                        schema.Append(" ");
+                        schema.Append(parameter.Name);
+                    }
+                    schema.Append(");");
                 }
                 schema.Append("}");
             }
-            Console.WriteLine( schema.ToString() );
+            //Console.WriteLine( schema.ToString() );
             return schema.ToString();
         }
 
@@ -82,7 +92,7 @@ static partial class Program
 
             var references = new[] {
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Assistant).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Code).Assembly.Location),
                 MetadataReference.CreateFromFile(Path.Combine(basePath, "System.Runtime.dll"))
             };
 
