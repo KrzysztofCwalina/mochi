@@ -1,34 +1,30 @@
 ﻿using Azure.AI.OpenAI;
 using Microsoft.CognitiveServices.Speech;
 
-static class Assistant2
+static class Mochi
 {
     internal static async Task Run(AIServices ai)
     {
         Prompt prompt = new Prompt("a cat");
-        var keywordModel = KeywordRecognitionModel.FromFile("hey_mochi.table");
+        var keyword = KeywordRecognitionModel.FromFile("hey_mochi.table");
         while (true)
         {
             Console.WriteLine("waiting ...");
 
-            KeywordRecognitionResult keyword = await ai.RecognizeOnceAsync(keywordModel);
+            await ai.WaitForKeyword(keyword);
             await ai.StopSpeakingAsync();
 
             Console.WriteLine("listening ...");
-            SpeechRecognitionResult recognized = await ai.RecognizeOnceAsync();
-            var recognizedText = recognized.Text;
-            Console.WriteLine(recognizedText);
+            string recognized = await ai.RecognizeFromMicrophoneAsync();
+            Console.WriteLine(recognized);
 
-            if (string.IsNullOrEmpty(recognizedText)) continue;
-
-            bool handled = await ai.TryInterpret(recognizedText);
-            if (handled) continue;
+            if (string.IsNullOrEmpty(recognized)) continue;
 
             Console.WriteLine("thinking ...");
 
-            prompt.Add(recognizedText);
+            prompt.Add(recognized);
 
-            var response = await ai.GetResponseAsync(prompt);
+            var response = await ai.GetAnswerAsync(prompt);
 
             prompt.Add(response, ChatRole.Assistant);
 

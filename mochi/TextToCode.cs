@@ -57,7 +57,7 @@ static partial class Program
             var prompt = new Prompt(_context);
             prompt.Add($"Show me one line of code calling the API to compute {request}");
 
-            string response = await ai.GetResponseAsync(prompt);
+            string response = await ai.GetAnswerAsync(prompt);
 
             MakeCall(response);
         }

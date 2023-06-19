@@ -1,7 +1,7 @@
 ﻿using Azure.AI.OpenAI;
 using System.Linq.Expressions;
 
-class Prompt
+public class Prompt
 {
     ChatCompletionsOptions _options = new ChatCompletionsOptions();
 
@@ -19,13 +19,13 @@ class Prompt
         _options.Messages[0] = message;
     }
 
-    internal void Add(string message)
+    public void Add(string message)
     {
         var m = new ChatMessage(ChatRole.User, message);
         _options.Messages.Add(m);
     }
 
-    internal void Add(string message, ChatRole role)
+    public void Add(string message, ChatRole role)
     {
         var m = new ChatMessage(role, message);
         _options.Messages.Add(m);
