@@ -1,39 +1,13 @@
 ﻿
-static class Program
+var clu = new Clu(typeof(Assistant));
+await clu.ExecuteAsync("How to make cookies?");
+
+public static class Assistant
 {
-    static async Task Main()
+    public static void CookieReceipe()
     {
-        AIServices ai = new AIServices();
-
-        var api = """
-            public static class Assistant {
-                public string GetTime(string location = default);
-                public string GetWeather(string location = default, DateTimeOffset time = default);
-            }
-        """;
-
-        // this is the OpenAI system message
-        var context = $$"""
-            You are an expert C# programmer. 
-            You have the following C# API awaliable: {{api}}. 
-            When you show me code, I want just the calling code. No markup, no markdown, not comments, etc.
-        """;
-        
-        var requests = new string[] {
-            "what time is it?",
-            "what's the time?",
-            "what's the weather in Seattle?",
-            "what's the weather tomorrow?"
-        }; 
-
-        foreach (string request in requests)
-        {
-            var prompt = new Prompt(context);
-            prompt.Add($"Show me one line of code calling the API to compute {request}");
-
-            string response = await ai.GetResponseAsync(prompt);
-
-            Console.WriteLine($"Q: {request}\nA: {response}");
-        }
+        Console.WriteLine("mix milk and flour");
     }
+    public static void GetTime() => Console.WriteLine($"It's {DateTime.Now.ToString("t")}.");
+    public static void DontUnderstand() => Console.WriteLine("I don't understand the request");
 }

@@ -1,7 +1,7 @@
 ﻿using Azure.AI.OpenAI;
 using Microsoft.CognitiveServices.Speech;
 
-static class Assistant
+static class Assistant2
 {
     internal static async Task Run(AIServices ai)
     {
