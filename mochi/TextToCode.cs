@@ -1,4 +1,5 @@
 ﻿
+using Azure.AI.OpenAI;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -21,7 +22,7 @@ static partial class Program
             // this is the OpenAI system message
             _context = $$"""
                 You are an expert C# programmer. 
-                You have the following C# API awaliable: {{api}}. 
+                You have the following C# API available: {{api}}. 
                 When you show me code, I want just the calling code. No markup, no markdown, not comments, etc.
             """;
         }
@@ -54,15 +55,22 @@ static partial class Program
 
         internal async Task ExecuteAsync(string request)
         {
+            int retries = 5;
             var prompt = new Prompt(_context);
-            prompt.Add($"Show me one line of code calling the API to compute {request}");
+            prompt.Add($"Show me one line of code calling the API to compute {request}.");
 
-            string response = await ai.GetAnswerAsync(prompt);
-
-            MakeCall(response);
+            while (retries-- > 0)
+            {
+                string response = await ai.GetAnswerAsync(prompt);
+                Console.WriteLine("LOG: " + response);
+                var error = MakeCall(response);
+                if (error == null) return;
+                
+                prompt.Add($"I got the following error {error}. Can you fix the code you provided previously?", ChatRole.User);          
+            }
         }
 
-        public void MakeCall(string source)
+        public string MakeCall(string source)
         {
             var s = $$"""
                 using System;
@@ -81,7 +89,7 @@ static partial class Program
                 Console.Write("Run? [y/n] : ");
                 var key = Console.ReadKey();
                 Console.WriteLine();
-                if (key.KeyChar != 'y') return;
+                if (key.KeyChar != 'y') return null;
                 
             }
 
@@ -107,16 +115,18 @@ static partial class Program
                     EmitResult emitResult = compilation.Emit(dllStream);
                     if (!emitResult.Success)
                     {
-                        Console.WriteLine(emitResult.Diagnostics.First().ToString());
-                        return;
+                        Console.WriteLine(source);
+                        var error = emitResult.Diagnostics.First().ToString();
+                        Console.WriteLine(error);
+                        return error;
                     }
                     dllStream.Position = 0;
                     var loaded = AssemblyLoadContext.Default.LoadFromStream(dllStream);
                     var executor = loaded.GetType("Executor");
                     var run = executor.GetMethod("RunAction");
                     run.Invoke(executor, new object[] { });
+                    return null;
                 }
-
             }
     }
 }

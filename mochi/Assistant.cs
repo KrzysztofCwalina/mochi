@@ -5,13 +5,14 @@ static class Mochi
 {
     internal static async Task Run(AIServices ai)
     {
-        Prompt prompt = new Prompt("a cat");
+        Prompt prompt = new Prompt("you are a cat.");
         var keyword = KeywordRecognitionModel.FromFile("hey_mochi.table");
+
         while (true)
         {
             Console.WriteLine("waiting ...");
 
-            await ai.WaitForKeyword(keyword);
+            await ai.WaitForKeywordAsync(keyword);
             await ai.StopSpeakingAsync();
 
             Console.WriteLine("listening ...");
@@ -29,13 +30,7 @@ static class Mochi
             prompt.Add(response, ChatRole.Assistant);
 
             Console.WriteLine("speaking ...");
-            ai.SpeakTextAsync(response);
+            ai.SpeakAsync(response);
         }
-    }
-
-    static ChatMessage CreatePersonaMessage(string persona)
-    {
-        return new ChatMessage(ChatRole.System, $"You are {persona}. Answer with short responses; around 3 sentences.");
-
     }
 }

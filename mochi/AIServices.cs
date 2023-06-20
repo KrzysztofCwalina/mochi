@@ -16,9 +16,7 @@ public class AIServices
     readonly SpeechRecognizer recognizer;
 
     readonly OpenAIClient aiClient;
-
     readonly KeywordRecognizer keywordRecognizer;
-    readonly KeywordRecognitionModel keywordModel;
 
     public AIServices()
     {
@@ -39,6 +37,27 @@ public class AIServices
         keywordRecognizer = new KeywordRecognizer(AudioConfig.FromDefaultMicrophoneInput());
     }
 
+    public async Task WaitForKeywordAsync(KeywordRecognitionModel keywoards)
+        => await keywordRecognizer.RecognizeOnceAsync(keywoards);
+
+    public async Task<string> RecognizeFromMicrophoneAsync()
+    {
+        var result = await recognizer.RecognizeOnceAsync();
+        return result.Text;
+    }
+
+    public void SpeakAsync(string response) => synthetizer.SpeakTextAsync(response);
+
+    public async Task StopSpeakingAsync() => await synthetizer.StopSpeakingAsync();
+
+    public async Task<string> GetAnswerAsync(Prompt prompt)
+    {
+        var options = prompt.CreateChatOptions();
+        ChatCompletions results = await aiClient.GetChatCompletionsAsync(openAiModelOrDeployment, options);
+        var response = results.Choices.First().Message.Content;
+        return response;
+    }
+
     static string ReadConfigurationSetting(string settingName)
     {
         var value = Environment.GetEnvironmentVariable(settingName);
@@ -49,33 +68,7 @@ public class AIServices
         }
         return value;
     }
-
-    public async Task WaitForKeyword(KeywordRecognitionModel keywoards)
-    {
-        await keywordRecognizer.RecognizeOnceAsync(keywoards);
-    }
-
-    public async Task<string> RecognizeFromMicrophoneAsync()
-    {
-        var result = await recognizer.RecognizeOnceAsync();
-        return result.Text;
-    }
-
-    public async Task StopSpeakingAsync() => await synthetizer.StopSpeakingAsync();
-
-    async Task<ChatCompletions> GetChatCompletionsAsync(Prompt prompt)
-        => await aiClient.GetChatCompletionsAsync(openAiModelOrDeployment, prompt.CreateChatOptions());
-    
-    public async Task<string> GetAnswerAsync(Prompt prompt)
-    {
-        ChatCompletions results = await GetChatCompletionsAsync(prompt);
-        var response = results.Choices.First().Message.Content;
-        return response;
-    }
-
-    public void SpeakTextAsync(string response) => synthetizer.SpeakTextAsync(response);
 }
-
 
 struct Entity
 {
