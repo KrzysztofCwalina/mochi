@@ -4,7 +4,7 @@ using Microsoft.CognitiveServices.Speech;
 
 namespace Mochi;
 
-static class Assistant
+static class MochiAssistant
 {
     public static async Task Run(AIServices ai)
     {

@@ -6,11 +6,42 @@ using System.Reflection.PortableExecutable;
 
 namespace Mochi;
 
-static class Sandbox
+class Sandbox
 {
-    public static void AssertSafeToExecute(Stream assemblyStream, Func<string, bool> allow = default)
+    readonly static string[] s_alowedBclTypes = new string[] {
+        "System.Private.CoreLib,System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
+        "System.Private.CoreLib,System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
+        "System.Private.CoreLib,System.Diagnostics.DebuggableAttribute",
+        "System.Private.CoreLib,System.Runtime.CompilerServices.CompilerGeneratedAttribute",
+        "System.Private.CoreLib,System.AttributeUsageAttribute",
+        "System.Private.CoreLib,System.Attribute",
+        "System.Private.CoreLib,System.DateTimeOffset",
+        "System.Private.CoreLib,System.DateTime"
+    };
+    readonly static string[] s_alowedBclMembers = new string[] {
+    };
+
+    readonly List<string> additionalAllowedTypes = new List<string>();
+    readonly List<string> additionalAssemblyReferences = new List<string>();
+
+    public void AllowType(Type type)
     {
-        var allowCallback = allow;
+        var typeName = type.FullName;
+        if (type.Namespace == null) {
+            typeName = "global::" + type.Name;
+        }
+        var assemblyName = type.Assembly.GetName().Name;
+
+        additionalAllowedTypes.Add($"{assemblyName},{typeName}");
+        additionalAssemblyReferences.Add(type.Assembly.Location);
+    }
+
+    public Func<string, bool> ShouldAllow { get; set; }
+    public IEnumerable<string> AssemblyReferences => additionalAssemblyReferences;
+
+    public void AssertSafeToExecute(Stream assemblyStream)
+    {
+        var allowCallback = ShouldAllow;
         var peReader = new PEReader(assemblyStream);
         MetadataReader reader = peReader.GetMetadataReader();
         foreach(MemberReferenceHandle mrh in reader.MemberReferences)
@@ -26,7 +57,17 @@ static class Sandbox
             var typeName = reader.GetString(typeReference.Name);
 
             var fullTypeName = $"{assemblyName},{typeNamespace}.{typeName}";
-            if (s_alowedTypes.Contains(fullTypeName))
+            if (string.IsNullOrEmpty(typeNamespace))
+            {
+                fullTypeName = $"{assemblyName},global::{typeName}";
+            }
+
+            if (additionalAllowedTypes.Contains(fullTypeName))
+            {
+                continue;
+            }
+
+            if (s_alowedBclTypes.Contains(fullTypeName))
             {
                 continue;
             }
@@ -34,7 +75,7 @@ static class Sandbox
             var memberName = reader.GetString(mr.Name);
             var fullMemberName = $"{fullTypeName}.{memberName}";
 
-            if (s_alowedMembers.Contains(fullMemberName))
+            if (s_alowedBclMembers.Contains(fullMemberName))
             {
                 continue;
             }
@@ -44,20 +85,6 @@ static class Sandbox
             throw new SandboxEscapedException($"You cannot call {fullMemberName}");
         }     
     }
-
-    readonly static string[] s_alowedTypes = new string[] {
-        "mochi,.Code",
-        "System.Private.CoreLib,System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
-        "System.Private.CoreLib,System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
-        "System.Private.CoreLib,System.Diagnostics.DebuggableAttribute",
-        "System.Private.CoreLib,System.Runtime.CompilerServices.CompilerGeneratedAttribute",
-        "System.Private.CoreLib,System.AttributeUsageAttribute",
-        "System.Private.CoreLib,System.Attribute",
-        "System.Private.CoreLib,System.DateTimeOffset",
-        "System.Private.CoreLib,System.DateTime"
-    };
-    readonly static string[] s_alowedMembers = new string[] {
-    };
 }
 
 class SandboxEscapedException : Exception

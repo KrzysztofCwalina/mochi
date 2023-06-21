@@ -12,7 +12,7 @@ namespace Mochi;
 
 static class ExecutionRuntime
 {
-    public static string MakeCall(string methodBody, Func<string, bool> allow = default)
+    public static string MakeCall(string methodBody, Sandbox sandbox)
     {
         var s = $$"""
             using System;
@@ -28,11 +28,12 @@ static class ExecutionRuntime
 
         string basePath = Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location);
 
-        var references = new[] {
-            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(Code).Assembly.Location),
-            MetadataReference.CreateFromFile(Path.Combine(basePath, "System.Runtime.dll"))
-        };
+        var references = new List<MetadataReference>();
+        references.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(Path.Combine(basePath, "System.Runtime.dll")));
+        foreach (string reference in sandbox.AssemblyReferences) {
+            references.Add(MetadataReference.CreateFromFile(reference));
+        }      
 
         CSharpCompilation compilation = CSharpCompilation.Create(
             "A" + Guid.NewGuid().ToString(),
@@ -54,7 +55,7 @@ static class ExecutionRuntime
             dllStream.Position = 0;
             try
             {
-                Sandbox.AssertSafeToExecute(dllStream, allow);
+                sandbox.AssertSafeToExecute(dllStream);
             }
             catch (SandboxEscapedException ex)
             {
