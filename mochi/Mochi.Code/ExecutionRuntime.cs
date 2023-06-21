@@ -12,7 +12,7 @@ namespace Mochi;
 
 static class ExecutionRuntime
 {
-    public static string MakeCall(string methodBody, Sandbox sandbox)
+    public static string ExecuteCode(string methodBody, Sandbox sandbox)
     {
         var s = $$"""
             using System;
