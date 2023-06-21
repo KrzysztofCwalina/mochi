@@ -7,7 +7,7 @@ using System.Runtime.Loader;
 
 namespace Mochi;
 
-internal class ExecutionRuntime
+static class ExecutionRuntime
 {
     public static string MakeCall(string methodBody, Func<string, bool> allow = default)
     {

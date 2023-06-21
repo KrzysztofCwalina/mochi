@@ -3,7 +3,7 @@ using System.Reflection.PortableExecutable;
 
 namespace Mochi;
 
-public class Sandbox
+static class Sandbox
 {
     public static void AssertSafeToExecute(Stream assemblyStream, Func<string, bool> allow = default)
     {

@@ -6,7 +6,7 @@ namespace Mochi;
 
 static class Assistant
 {
-    internal static async Task Run(AIServices ai)
+    public static async Task Run(AIServices ai)
     {
         Prompt prompt = new Prompt("you are a cat.");
         var keyword = KeywordRecognitionModel.FromFile("hey_mochi.table");
