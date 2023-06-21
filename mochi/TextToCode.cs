@@ -2,7 +2,10 @@
 using Azure.AI.OpenAI;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
+using mochi;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
@@ -13,7 +16,6 @@ static partial class Program
     {
         AIServices ai = new AIServices();
         string _context;
-        public bool Confirm { get; set; } = false;
 
         public TextToCode(params Type[] actions)
         {
@@ -27,33 +29,7 @@ static partial class Program
             """;
         }
 
-        private static string ExtractSchema(params Type[] actions)
-        {
-            var schema = new StringBuilder();
-            foreach(var type in actions)
-            {
-                schema.Append($"public class {type.Name} {{\n");
-                foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public))
-                {
-                    schema.Append($"\tpublic static {method.Name}(");
-                    bool first = true;
-                    foreach(var parameter in method.GetParameters())
-                    {
-                        if (!first) schema.Append(", ");
-                        first = false;
-                        schema.Append(parameter.ParameterType.Name);
-                        schema.Append(" ");
-                        schema.Append(parameter.Name);
-                    }
-                    schema.Append(");");
-                }
-                schema.Append("}");
-            }
-            //Console.WriteLine( schema.ToString() );
-            return schema.ToString();
-        }
-
-        internal async Task ExecuteAsync(string request)
+        public async Task ExecuteAsync(string request)
         {
             int retries = 5;
             var prompt = new Prompt(_context);
@@ -65,12 +41,38 @@ static partial class Program
                 Console.WriteLine("LOG: " + response);
                 var error = MakeCall(response);
                 if (error == null) return;
-                
-                prompt.Add($"I got the following error {error}. Can you fix the code you provided previously?", ChatRole.User);          
+                Console.WriteLine("LOG: " + error);
+                prompt.Add($"I got the following error {error}. Can you fix the code you provided previously?", ChatRole.User);
             }
         }
 
-        public string MakeCall(string source)
+        private static string ExtractSchema(params Type[] actions)
+        {
+            var schema = new StringBuilder();
+            foreach (var type in actions)
+            {
+                schema.Append($"public class {type.Name} {{\n");
+                foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public))
+                {
+                    schema.Append($"\tpublic static {method.Name}(");
+                    bool first = true;
+                    foreach (var parameter in method.GetParameters())
+                    {
+                        if (!first) schema.Append(", ");
+                        first = false;
+                        schema.Append(parameter.ParameterType.Name);
+                        schema.Append(" ");
+                        schema.Append(parameter.Name);
+                    }
+                    schema.Append(");");
+                }
+                schema.Append("}");
+            }
+            Debug.WriteLine(schema);
+            return schema.ToString();
+        }
+
+        private string MakeCall(string source)
         {
             var s = $$"""
                 using System;
@@ -82,21 +84,9 @@ static partial class Program
                 }
                 """;
 
-            if (Confirm)
-            {
-                Console.WriteLine();
-                Console.WriteLine(s);
-                Console.Write("Run? [y/n] : ");
-                var key = Console.ReadKey();
-                Console.WriteLine();
-                if (key.KeyChar != 'y') return null;
-                
-            }
-
             SyntaxTree tree = CSharpSyntaxTree.ParseText(s);
 
             string basePath = Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location);
-
 
             var references = new[] {
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
@@ -105,28 +95,43 @@ static partial class Program
             };
 
             CSharpCompilation compilation = CSharpCompilation.Create(
-                "A"  + Guid.NewGuid().ToString(),
+                "A" + Guid.NewGuid().ToString(),
                 new[] { tree },
                 references,
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-                using (var dllStream = new MemoryStream())
+            using (var dllStream = new MemoryStream())
+            {
+                EmitResult emitResult = compilation.Emit(dllStream);
+                if (!emitResult.Success)
                 {
-                    EmitResult emitResult = compilation.Emit(dllStream);
-                    if (!emitResult.Success)
-                    {
-                        Console.WriteLine(source);
-                        var error = emitResult.Diagnostics.First().ToString();
-                        Console.WriteLine(error);
-                        return error;
-                    }
-                    dllStream.Position = 0;
-                    var loaded = AssemblyLoadContext.Default.LoadFromStream(dllStream);
-                    var executor = loaded.GetType("Executor");
-                    var run = executor.GetMethod("RunAction");
-                    run.Invoke(executor, new object[] { });
-                    return null;
+                    Debug.WriteLine(source);
+                    var error = emitResult.Diagnostics.First().ToString();
+                    Debug.WriteLine(error);
+                    return error;
                 }
+
+                dllStream.Position = 0;
+                try
+                {
+                    Sandbox.AssertSafeToExecute(dllStream);
+                }
+                catch(SandboxLeftException ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    return ex.Message;
+                }
+
+                dllStream.Position = 0;
+                var loaded = AssemblyLoadContext.Default.LoadFromStream(dllStream);
+
+                var executor = loaded.GetType("Executor");
+                var run = executor.GetMethod("RunAction");
+                run.Invoke(executor, new object[] { });
+                return null;
             }
+        }
+
+
     }
 }

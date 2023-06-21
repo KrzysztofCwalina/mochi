@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		bugs.txt = bugs.txt
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{F8C62F0E-5017-4B1A-93A2-ECE95B9D9256}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{1E95117D-A981-4A3B-A242-4AB0769CF422}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E95117D-A981-4A3B-A242-4AB0769CF422}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E95117D-A981-4A3B-A242-4AB0769CF422}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8C62F0E-5017-4B1A-93A2-ECE95B9D9256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8C62F0E-5017-4B1A-93A2-ECE95B9D9256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8C62F0E-5017-4B1A-93A2-ECE95B9D9256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8C62F0E-5017-4B1A-93A2-ECE95B9D9256}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
