@@ -1,4 +1,6 @@
-﻿
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 var t2c = new TextToCode(typeof(Code)); // extracts "schema" from the Code class
 
 while (true)

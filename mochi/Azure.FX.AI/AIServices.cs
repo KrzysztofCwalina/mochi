@@ -1,4 +1,7 @@
-﻿using Azure.AI.OpenAI;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Azure.AI.OpenAI;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using System.Text.Json.Serialization;

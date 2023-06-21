@@ -1,4 +1,7 @@
-﻿using System.Reflection.Metadata;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
 namespace Mochi;

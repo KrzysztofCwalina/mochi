@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
