@@ -14,5 +14,7 @@ public static class Code
     public static void GetTime(string location = default) => Console.WriteLine($"It's {DateTime.Now.ToString("t")}");
     public static void DontUnderstand() => Console.WriteLine("I don't understand the request");
 
+    public static void CommunicateWithUser(string textToSpeak) => Console.WriteLine(textToSpeak);
+
     public static void Add(double x, double y) => Console.WriteLine(x + y);
 }

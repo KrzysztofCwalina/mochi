@@ -3,16 +3,11 @@ using System.Reflection.PortableExecutable;
 
 namespace mochi
 {
-    class SandboxLeftException : Exception
-    {
-        public SandboxLeftException(string message) : base(message)
-        {
-        }
-    }
     public class Sandbox
     {
-        public static void AssertSafeToExecute(Stream assemblyStream)
+        public static void AssertSafeToExecute(Stream assemblyStream, Func<string, bool> allow = default)
         {
+            var allowCallback = allow;
             var peReader = new PEReader(assemblyStream);
             MetadataReader reader = peReader.GetMetadataReader();
             foreach(MemberReferenceHandle mrh in reader.MemberReferences)
@@ -27,7 +22,7 @@ namespace mochi
                 string typeNamespace = reader.GetString(typeReference.Namespace);
                 var typeName = reader.GetString(typeReference.Name);
 
-                var fullTypeName = $"{assemblyName}.{typeNamespace}.{typeName}";
+                var fullTypeName = $"{assemblyName},{typeNamespace}.{typeName}";
                 if (s_alowedTypes.Contains(fullTypeName))
                 {
                     continue;
@@ -41,21 +36,29 @@ namespace mochi
                     continue;
                 }
 
-                throw new SandboxLeftException($"You cannot call {fullMemberName}");
+                if (allowCallback != null) if (allowCallback(fullMemberName)) continue;
+
+                throw new SandboxEscapedException($"You cannot call {fullMemberName}");
             }     
         }
 
         readonly static string[] s_alowedTypes = new string[] {
-            "System.Private.CoreLib.System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
-            "System.Private.CoreLib.System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
-            "System.Private.CoreLib.System.Diagnostics.DebuggableAttribute",
-            "System.Private.CoreLib.System.Runtime.CompilerServices.CompilerGeneratedAttribute",
-            "System.Private.CoreLib.System.AttributeUsageAttribute",
-            "System.Private.CoreLib.System.Attribute",
-            "mochi..Code",
-            "System.Private.CoreLib.System.DateTimeOffset"
+            "System.Private.CoreLib,System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
+            "System.Private.CoreLib,System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
+            "System.Private.CoreLib,System.Diagnostics.DebuggableAttribute",
+            "System.Private.CoreLib,System.Runtime.CompilerServices.CompilerGeneratedAttribute",
+            "System.Private.CoreLib,System.AttributeUsageAttribute",
+            "System.Private.CoreLib,System.Attribute",
+            "mochi,.Code",
+            "System.Private.CoreLib,System.DateTimeOffset"
         };
         readonly static string[] s_alowedMembers = new string[] {
         };
+    }
+
+    class SandboxEscapedException : Exception
+    {
+        public SandboxEscapedException(string message) : base(message)
+        {}
     }
 }

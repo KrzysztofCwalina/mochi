@@ -29,7 +29,7 @@ static partial class Program
             """;
         }
 
-        public async Task ExecuteAsync(string request)
+        public async Task ExecuteAsync(string request, Func<string, bool> allow = default)
         {
             int retries = 5;
             var prompt = new Prompt(_context);
@@ -39,7 +39,7 @@ static partial class Program
             {
                 string response = await ai.GetAnswerAsync(prompt);
                 Console.WriteLine("LOG: " + response);
-                var error = MakeCall(response);
+                var error = MakeCall(response, allow);
                 if (error == null) return;
                 Console.WriteLine("LOG: " + error);
                 prompt.Add($"I got the following error {error}. Can you fix the code you provided previously?", ChatRole.User);
@@ -72,7 +72,7 @@ static partial class Program
             return schema.ToString();
         }
 
-        private string MakeCall(string source)
+        private string MakeCall(string source, Func<string, bool> allow = default)
         {
             var s = $$"""
                 using System;
@@ -114,9 +114,9 @@ static partial class Program
                 dllStream.Position = 0;
                 try
                 {
-                    Sandbox.AssertSafeToExecute(dllStream);
+                    Sandbox.AssertSafeToExecute(dllStream, allow);
                 }
-                catch(SandboxLeftException ex)
+                catch(SandboxEscapedException ex)
                 {
                     Debug.WriteLine(ex.Message);
                     return ex.Message;

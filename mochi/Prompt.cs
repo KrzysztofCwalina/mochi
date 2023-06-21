@@ -1,5 +1,4 @@
 ﻿using Azure.AI.OpenAI;
-using System.Linq.Expressions;
 
 public class Prompt
 {
