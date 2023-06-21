@@ -1,5 +1,7 @@
 ﻿using Azure.AI.OpenAI;
 
+namespace Azure.FX.AI;
+
 public class Prompt
 {
     ChatCompletionsOptions _options = new ChatCompletionsOptions();

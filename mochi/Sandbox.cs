@@ -1,64 +1,63 @@
 ﻿using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
-namespace mochi
+namespace Mochi;
+
+public class Sandbox
 {
-    public class Sandbox
+    public static void AssertSafeToExecute(Stream assemblyStream, Func<string, bool> allow = default)
     {
-        public static void AssertSafeToExecute(Stream assemblyStream, Func<string, bool> allow = default)
+        var allowCallback = allow;
+        var peReader = new PEReader(assemblyStream);
+        MetadataReader reader = peReader.GetMetadataReader();
+        foreach(MemberReferenceHandle mrh in reader.MemberReferences)
         {
-            var allowCallback = allow;
-            var peReader = new PEReader(assemblyStream);
-            MetadataReader reader = peReader.GetMetadataReader();
-            foreach(MemberReferenceHandle mrh in reader.MemberReferences)
+            var mr = reader.GetMemberReference(mrh);
+            TypeReferenceHandle typeReferenceHandle = (TypeReferenceHandle)mr.Parent;
+            var typeReference = reader.GetTypeReference(typeReferenceHandle);
+            var assemblyReferenceHandle = (AssemblyReferenceHandle)typeReference.ResolutionScope;
+            var assemblyReference = reader.GetAssemblyReference(assemblyReferenceHandle);
+
+            string assemblyName = reader.GetString(assemblyReference.Name);
+            string typeNamespace = reader.GetString(typeReference.Namespace);
+            var typeName = reader.GetString(typeReference.Name);
+
+            var fullTypeName = $"{assemblyName},{typeNamespace}.{typeName}";
+            if (s_alowedTypes.Contains(fullTypeName))
             {
-                var mr = reader.GetMemberReference(mrh);
-                TypeReferenceHandle typeReferenceHandle = (TypeReferenceHandle)mr.Parent;
-                var typeReference = reader.GetTypeReference(typeReferenceHandle);
-                var assemblyReferenceHandle = (AssemblyReferenceHandle)typeReference.ResolutionScope;
-                var assemblyReference = reader.GetAssemblyReference(assemblyReferenceHandle);
+                continue;
+            }
 
-                string assemblyName = reader.GetString(assemblyReference.Name);
-                string typeNamespace = reader.GetString(typeReference.Namespace);
-                var typeName = reader.GetString(typeReference.Name);
+            var memberName = reader.GetString(mr.Name);
+            var fullMemberName = $"{fullTypeName}.{memberName}";
 
-                var fullTypeName = $"{assemblyName},{typeNamespace}.{typeName}";
-                if (s_alowedTypes.Contains(fullTypeName))
-                {
-                    continue;
-                }
+            if (s_alowedMembers.Contains(fullMemberName))
+            {
+                continue;
+            }
 
-                var memberName = reader.GetString(mr.Name);
-                var fullMemberName = $"{fullTypeName}.{memberName}";
+            if (allowCallback != null) if (allowCallback(fullMemberName)) continue;
 
-                if (s_alowedMembers.Contains(fullMemberName))
-                {
-                    continue;
-                }
-
-                if (allowCallback != null) if (allowCallback(fullMemberName)) continue;
-
-                throw new SandboxEscapedException($"You cannot call {fullMemberName}");
-            }     
-        }
-
-        readonly static string[] s_alowedTypes = new string[] {
-            "System.Private.CoreLib,System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
-            "System.Private.CoreLib,System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
-            "System.Private.CoreLib,System.Diagnostics.DebuggableAttribute",
-            "System.Private.CoreLib,System.Runtime.CompilerServices.CompilerGeneratedAttribute",
-            "System.Private.CoreLib,System.AttributeUsageAttribute",
-            "System.Private.CoreLib,System.Attribute",
-            "mochi,.Code",
-            "System.Private.CoreLib,System.DateTimeOffset"
-        };
-        readonly static string[] s_alowedMembers = new string[] {
-        };
+            throw new SandboxEscapedException($"You cannot call {fullMemberName}");
+        }     
     }
 
-    class SandboxEscapedException : Exception
-    {
-        public SandboxEscapedException(string message) : base(message)
-        {}
-    }
+    readonly static string[] s_alowedTypes = new string[] {
+        "System.Private.CoreLib,System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
+        "System.Private.CoreLib,System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
+        "System.Private.CoreLib,System.Diagnostics.DebuggableAttribute",
+        "System.Private.CoreLib,System.Runtime.CompilerServices.CompilerGeneratedAttribute",
+        "System.Private.CoreLib,System.AttributeUsageAttribute",
+        "System.Private.CoreLib,System.Attribute",
+        "mochi,.Code",
+        "System.Private.CoreLib,System.DateTimeOffset"
+    };
+    readonly static string[] s_alowedMembers = new string[] {
+    };
+}
+
+class SandboxEscapedException : Exception
+{
+    public SandboxEscapedException(string message) : base(message)
+    {}
 }

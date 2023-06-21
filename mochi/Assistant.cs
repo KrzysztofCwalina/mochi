@@ -1,7 +1,10 @@
 ﻿using Azure.AI.OpenAI;
+using Azure.FX.AI;
 using Microsoft.CognitiveServices.Speech;
 
-static class Mochi
+namespace Mochi;
+
+static class Assistant
 {
     internal static async Task Run(AIServices ai)
     {

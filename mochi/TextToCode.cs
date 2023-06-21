@@ -1,14 +1,7 @@
 ﻿
 using Azure.AI.OpenAI;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Emit;
-using mochi;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.Loader;
-using System.Text;
+using Azure.FX.AI;
+using Mochi;
 
 static partial class Program
 {

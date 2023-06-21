@@ -1,8 +1,9 @@
-﻿using Azure;
-using Azure.AI.OpenAI;
+﻿using Azure.AI.OpenAI;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using System.Text.Json.Serialization;
+
+namespace Azure.FX.AI;
 
 public class AIServices
 {
