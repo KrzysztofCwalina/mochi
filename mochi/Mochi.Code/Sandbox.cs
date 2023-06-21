@@ -16,7 +16,8 @@ class Sandbox
         "System.Private.CoreLib,System.AttributeUsageAttribute",
         "System.Private.CoreLib,System.Attribute",
         "System.Private.CoreLib,System.DateTimeOffset",
-        "System.Private.CoreLib,System.DateTime"
+        "System.Private.CoreLib,System.DateTime",
+        "System.Private.CoreLib,System.Random"
     };
     readonly static string[] s_alowedBclMembers = new string[] {
     };

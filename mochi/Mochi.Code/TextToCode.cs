@@ -10,6 +10,7 @@ namespace Azure.FX.AI;
 
 public class TextToCode
 {
+    const string NATURAL_LANGUAGE = "NATURAL_LANGUAGE:";
     readonly AIServices ai = new AIServices();
     readonly Type _assistant;
     readonly string _context;
@@ -23,13 +24,14 @@ public class TextToCode
 
         // this is the OpenAI system message
         _context = $$"""
-            You have the following C# API available: {{api}}. 
-                Your answers must be either C# code calling one of the provided APIs, or free form textual answer, if none of the APIs match.
-                When you generate C# code, I want just code; no markup, no markdown, no commentary, etc. as I will be compiling the code.  
-                When you generate free form text, prefix the response with 'TEXT:'.
-                if you return code, you must call at least one API provided.
-                If I send you a compilation error, don't appologize or add any commentary. Just reply with fixed code. 
-            """;
+            You have the following C# APIs provided: {{api}}. 
+            Your answers must be either C# source code calling one of the provided APIs, or a natural language text, if none of the provided APIs match.
+            If you generate C# code, it must be just code; no markup, no markdown, no commentary, etc., as the code will be compiled without changes.
+            If you generate C# code, you must call at least one of the APIs provided.
+            If you generate a natural language answer, prefix the response with '{{NATURAL_LANGUAGE}}'.
+            If I send you a compilation error, don't appologize, or add any natural language commentary. Just reply with fixed C# code. 
+            Don't ever reply with the same text as the question/prompt.
+        """;
 
         _sandbox = new Sandbox();
         _sandbox.AllowType(assistant);
@@ -49,12 +51,12 @@ public class TextToCode
             string response = await ai.GetAnswerAsync(prompt);
             if (Log) Cli.WriteLine("LOG: " + response, ConsoleColor.DarkBlue);
 
-            if (response.StartsWith("TEXT:"))
+            if (response.StartsWith(NATURAL_LANGUAGE))
             {
                 var noMatch = NoMatchFallback;
                 if (noMatch == null) return false;
 
-                var text = response.Substring("TEXT:".Length);
+                var text = response.Substring(NATURAL_LANGUAGE.Length);
                 text = text.TrimStart(' ');
                 noMatch(text);
                 return true;

@@ -19,7 +19,7 @@ while (true)
 
 public static class Assistant
 {
-    //public static void AddNumbers(double x, double y) => Console.WriteLine(x + y);
+    public static void AddNumbers(double x, double y) => Console.WriteLine(x + y);
 
     //public static void AddTask(string task) => Console.WriteLine("TODO: " + task);
 
