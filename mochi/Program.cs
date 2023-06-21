@@ -19,13 +19,18 @@ while (true)
 
 public static class Assistant
 {
-    public static void AddNumbers(double x, double y) => Console.WriteLine(x + y);
+    public static void Add(double x, double y) => Console.WriteLine(x + y);
 
-    //public static void AddTask(string task) => Console.WriteLine("TODO: " + task);
+    public static void AddTask(string task) => Console.WriteLine("ToDo added: " + task);
 
-    //public static void Exit() => Environment.Exit(0);
+    public static void Exit() => Environment.Exit(0);
 
-    //public static void GetWeatherForecast(double longitude, double latitude, DateTimeOffset when) => Console.WriteLine($"it's nice");
+    public static void Time() => Console.WriteLine($"It's {DateTime.Now.ToString("t")}");
+    public static void Time(double longitude, double latitude) => Console.WriteLine($"It's {DateTime.Now.ToString("t")}");
 
-    //public static void GetTime(double longitude, double latitude) => Console.WriteLine($"It's {DateTime.Now.ToString("t")}");
+    public static void WeatherForecast(DateTimeOffset when, double longitude, double latitude) => Console.WriteLine($"it will be rainy!");
+
+    public static void CurrentWeather(double longitude, double latitude) => Console.WriteLine($"it's sunny there!");
+
+    public static void CurrentWeather() => Console.WriteLine($"it's sunny!");
 }

@@ -44,26 +44,26 @@ public class TextToCode
     {
         int retries = 5;
         var prompt = new Prompt(_context);
-        prompt.Add($"Give me a response for prompt: {request}");
+        prompt.Add($"{request}");
 
         while (retries-- > 0)
         {
             string response = await ai.GetAnswerAsync(prompt);
-            if (Log) Cli.WriteLine("LOG: " + response, ConsoleColor.DarkBlue);
-
+            
             if (response.StartsWith(NATURAL_LANGUAGE))
             {
                 var noMatch = NoMatchFallback;
                 if (noMatch == null) return false;
-
                 var text = response.Substring(NATURAL_LANGUAGE.Length);
                 text = text.TrimStart(' ');
                 noMatch(text);
                 return true;
             }
+
+            if (Log) Cli.WriteLine("EXECUTING: " + response, ConsoleColor.DarkBlue);
             var error = ExecutionRuntime.ExecuteCode(response, _sandbox);
             if (error == null) return true;
-            if (Log) Cli.WriteLine("LOG: " + error, ConsoleColor.DarkBlue);
+            if (Log) Cli.WriteLine("ERROR: " + error, ConsoleColor.DarkBlue);
             prompt.Add($"I got the following error {error} when compiling the code. Can you fix the code you provided previously?", ChatRole.User);
         }
 
