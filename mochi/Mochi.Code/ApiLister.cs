@@ -14,10 +14,10 @@ static class ApiLister
         var listing = new StringBuilder();
         foreach (var type in types)
         {
-            listing.Append($"public class {type.Name} {{\n");
+            listing.Append($"public static class {type.Name} {{\n");
             foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public))
             {
-                listing.Append($"\tpublic static {method.Name}(");
+                listing.Append($"\tpublic static {method.ReturnType.Name} {method.Name}(");
                 bool first = true;
                 foreach (var parameter in method.GetParameters())
                 {

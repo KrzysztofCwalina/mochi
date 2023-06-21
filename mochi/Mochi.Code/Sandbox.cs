@@ -46,14 +46,15 @@ static class Sandbox
     }
 
     readonly static string[] s_alowedTypes = new string[] {
+        "mochi,.Code",
         "System.Private.CoreLib,System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
         "System.Private.CoreLib,System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
         "System.Private.CoreLib,System.Diagnostics.DebuggableAttribute",
         "System.Private.CoreLib,System.Runtime.CompilerServices.CompilerGeneratedAttribute",
         "System.Private.CoreLib,System.AttributeUsageAttribute",
         "System.Private.CoreLib,System.Attribute",
-        "mochi,.Code",
-        "System.Private.CoreLib,System.DateTimeOffset"
+        "System.Private.CoreLib,System.DateTimeOffset",
+        "System.Private.CoreLib,System.DateTime"
     };
     readonly static string[] s_alowedMembers = new string[] {
     };

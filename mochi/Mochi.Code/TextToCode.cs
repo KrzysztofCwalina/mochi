@@ -18,9 +18,9 @@ static partial class Program
 
             // this is the OpenAI system message
             _context = $$"""
-                You are an expert C# programmer. 
+                You are a C# programmer. 
+                When you show me code, I want just code. No markup, no markdown, not comments, etc.
                 You have the following C# API available: {{api}}. 
-                When you show me code, I want just the calling code. No markup, no markdown, not comments, etc.
             """;
         }
 
@@ -28,7 +28,7 @@ static partial class Program
         {
             int retries = 5;
             var prompt = new Prompt(_context);
-            prompt.Add($"Show me one line of code calling the API to compute {request}.");
+            prompt.Add($"Show me code (just code) to compute {request}.");
 
             while (retries-- > 0)
             {
@@ -37,7 +37,7 @@ static partial class Program
                 var error = ExecutionRuntime.MakeCall(response, allow);
                 if (error == null) return;
                 Console.WriteLine("LOG: " + error);
-                prompt.Add($"I got the following error {error}. Can you fix the code you provided previously?", ChatRole.User);
+                prompt.Add($"I got the following error {error} when compiling the code. Can you fix the code you provided previously?", ChatRole.User);
             }
         }
     }
