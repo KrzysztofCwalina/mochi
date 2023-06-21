@@ -6,59 +6,65 @@ using Azure.FX.AI;
 using Azure.FX.Tooling;
 using Mochi;
 
-static partial class Program
+namespace Azure.FX.AI;
+
+public class TextToCode
 {
-    public class TextToCode
+    readonly AIServices ai = new AIServices();
+    readonly Type _assistant;
+    readonly string _context;
+    readonly Sandbox _sandbox;
+
+    public TextToCode(Type assistant)
     {
-        readonly AIServices ai = new AIServices();
-        readonly Type _assistant;
-        readonly string _context;
-        readonly Sandbox _sandbox;
-        Action<string> _noMatch;
-        bool _log;
-        public TextToCode(Type assistant, Action<string> fallback, bool log)
-        {
-            _assistant = assistant;
-            _noMatch = fallback;
-            _log = log;
+        _assistant = assistant;
 
-            string api = ApiLister.CreateApiListing(_assistant);
+        string api = ApiLister.CreateApiListing(_assistant);
 
-            // this is the OpenAI system message
-            _context = $$"""
-                You have the following C# API available: {{api}}. 
+        // this is the OpenAI system message
+        _context = $$"""
+            You have the following C# API available: {{api}}. 
                 Your answers must be either C# code calling one of the provided APIs, or free form textual answer, if none of the APIs match.
                 When you generate C# code, I want just code; no markup, no markdown, no commentary, etc. as I will be compiling the code.  
-                When you generate free form text, prefix the response with 'TEXT:'
+                When you generate free form text, prefix the response with 'TEXT:'.
+                if you return code, you must call at least one API provided.
+                If I send you a compilation error, don't appologize or add any commentary. Just reply with fixed code. 
             """;
 
-            _sandbox = new Sandbox();
-            _sandbox.AllowType(assistant);
-        }
+        _sandbox = new Sandbox();
+        _sandbox.AllowType(assistant);
+    }
 
-        public async Task ProcessAsync(string request)
+    public Action<string> NoMatchFallback { get; set; }
+    public bool Log { get; set; } = false;
+
+    public async Task<bool> ProcessAsync(string request)
+    {
+        int retries = 5;
+        var prompt = new Prompt(_context);
+        prompt.Add($"Give me a response for prompt: {request}");
+
+        while (retries-- > 0)
         {
-            int retries = 5;
-            var prompt = new Prompt(_context);
-            prompt.Add($"Give me a response for prompt: {request}");
+            string response = await ai.GetAnswerAsync(prompt);
+            if (Log) Cli.WriteLine("LOG: " + response, ConsoleColor.DarkBlue);
 
-            while (retries-- > 0)
+            if (response.StartsWith("TEXT:"))
             {
-                string response = await ai.GetAnswerAsync(prompt);
-                if (_log) Cli.WriteLine("LOG: " + response, ConsoleColor.DarkBlue);
+                var noMatch = NoMatchFallback;
+                if (noMatch == null) return false;
 
-                if (response.StartsWith("TEXT:"))
-                {
-                    var text = response.Substring("TEXT:".Length);
-                    text = text.TrimStart(' ');
-                    _noMatch(text);
-                    return;
-                }
-                var error = ExecutionRuntime.ExecuteCode(response, _sandbox);
-                if (error == null) return;
-                if (_log) Cli.WriteLine("LOG: " + error, ConsoleColor.DarkBlue);
-                prompt.Add($"I got the following error {error} when compiling the code. Can you fix the code you provided previously?", ChatRole.User);
+                var text = response.Substring("TEXT:".Length);
+                text = text.TrimStart(' ');
+                noMatch(text);
+                return true;
             }
+            var error = ExecutionRuntime.ExecuteCode(response, _sandbox);
+            if (error == null) return true;
+            if (Log) Cli.WriteLine("LOG: " + error, ConsoleColor.DarkBlue);
+            prompt.Add($"I got the following error {error} when compiling the code. Can you fix the code you provided previously?", ChatRole.User);
         }
+
+        return false;
     }
 }
