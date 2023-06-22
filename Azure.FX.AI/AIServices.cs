@@ -70,8 +70,8 @@ public class AIServices
         var value = Environment.GetEnvironmentVariable(settingName);
         if (value == null)
         {
-            Console.WriteLine($"{settingName} not set.");
-            Environment.Exit(0);
+            var message = $"configuration setting {settingName} not set.";
+            throw new Exception(message);
         }
         return value;
     }

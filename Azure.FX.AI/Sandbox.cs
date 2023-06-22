@@ -8,7 +8,7 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Linq;
 
-namespace Mochi;
+namespace Azure.FX.AI.Runtime;
 
 class Sandbox
 {

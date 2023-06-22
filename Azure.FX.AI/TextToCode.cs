@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Azure.AI.OpenAI;
-using Mochi;
+using Azure.FX.AI.Runtime;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;

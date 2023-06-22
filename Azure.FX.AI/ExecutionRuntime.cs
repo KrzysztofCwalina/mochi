@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 
-namespace Mochi;
+namespace Azure.FX.AI.Runtime;
 
 static class ExecutionRuntime
 {

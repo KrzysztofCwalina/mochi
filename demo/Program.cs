@@ -32,9 +32,7 @@ public static class Assistant
 
     public static void Add(double x, double y) => Say((x + y).ToString());
 
-    public static void Add(int x, int y) => Say((x + y).ToString());
-
-    public static void AddTodo(string task, string assignedTo = default) => s_tasks.Add((task, assignedTo));
+    public static void AddTodo(string task, string? assignedTo = default) => s_tasks.Add((task, assignedTo));
 
     public static void Exit() => Environment.Exit(0);
 

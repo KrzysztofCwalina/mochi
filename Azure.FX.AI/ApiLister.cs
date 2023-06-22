@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
-namespace Mochi;
+namespace Azure.FX.AI.Runtime;
 
 static class ApiLister
 {
