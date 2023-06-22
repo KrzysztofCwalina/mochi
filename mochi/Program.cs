@@ -5,7 +5,7 @@ using Azure.FX.AI;
 using Azure.FX.Tooling;
 
 var t2c = new TextToCode(typeof(Assistant));
-t2c.NoMatchFallback = (message) => Cli.WriteLine(message, ConsoleColor.Green);
+t2c.NoMatchFallback = (message) => Assistant.Say(message);
 t2c.Log = true;
 
 while (true)
@@ -13,24 +13,53 @@ while (true)
     var request = Console.ReadLine();
     if (string.IsNullOrEmpty(request)) continue;
 
-    await t2c.ProcessAsync(request); // executes Code's method that corresponds the closest to the request
+    await t2c.ProcessAsync(request);
     Console.WriteLine();
 }
 
 public static class Assistant
 {
-    public static void Add(double x, double y) => Console.WriteLine(x + y);
+    private static AIServices s_ai = new AIServices();
+    private static List<(string task, string assignedTo)> s_tasks = new List<(string task, string assignedTo)>();
 
-    public static void AddTask(string task) => Console.WriteLine("ToDo added: " + task);
+    public static void Say(string message)
+    {
+        Cli.WriteLine(message, ConsoleColor.Green);
+        //s_ai.SpeakAsync(message);
+    }
+
+    public static void Add(double x, double y) => Say((x + y).ToString());
+
+    public static void Add(int x, int y) => Say((x + y).ToString());
+
+    public static void AddTodo(string task, string assignedTo = default) => s_tasks.Add((task, assignedTo));
 
     public static void Exit() => Environment.Exit(0);
 
-    public static void Time() => Console.WriteLine($"It's {DateTime.Now.ToString("t")}");
-    public static void Time(double longitude, double latitude) => Console.WriteLine($"It's {DateTime.Now.ToString("t")}");
+    // Assistant.TellCurrentTime();
+    // Assistant.Say($"It's {DateTime.Now.ToString("t")}");
+    public static void TellCurrentTime() => Say($"It's {DateTime.Now.ToString("t")}");
 
-    public static void WeatherForecast(DateTimeOffset when, double longitude, double latitude) => Console.WriteLine($"it will be rainy!");
+    public static void TellCurrentDate() => Say($"It's {DateTime.Now.ToString("d")}");
 
-    public static void CurrentWeather(double longitude, double latitude) => Console.WriteLine($"it's sunny there!");
+    public static void ListTasks(string assignedTo = default)
+    {
+        foreach (var task in s_tasks)
+        {
+            if (string.IsNullOrEmpty(assignedTo) || assignedTo.Equals(task.assignedTo))
+            {
+                var taskMessage = task.task;
+                if (string.IsNullOrEmpty(assignedTo) && !string.IsNullOrEmpty(task.assignedTo))
+                    taskMessage += ". assigned to " + task.assignedTo.ToString();
 
-    public static void CurrentWeather() => Console.WriteLine($"it's sunny!");
+                Say(taskMessage);
+            }
+        }
+    }
 }
+
+// tell time, tell date
+// weather at location
+// add numbers, the subtract
+// add task to task list, read tasks
+// exit app
