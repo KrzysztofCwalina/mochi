@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	  <PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -8,7 +8,6 @@
 	  </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.AI.Language.Conversations" Version="1.0.0" />
 		<PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.5" />
 		<PackageReference Include="Azure.Core" Version="1.33.0" />
 		<PackageReference Include="Azure.Core.Experimental" Version="0.1.0-preview.27" />
@@ -20,6 +19,10 @@
 		<None Update="hey_mochi.table">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Azure.FX.AI\Azure.FX.AI.csproj" />
 	</ItemGroup>
 
 </Project>

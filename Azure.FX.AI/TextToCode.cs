@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 using Azure.AI.OpenAI;
-using Azure.FX.AI;
-using Azure.FX.Tooling;
 using Mochi;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Azure.FX.AI;
 
@@ -15,6 +16,9 @@ public class TextToCode
     readonly Type _assistant;
     readonly string _context;
     readonly Sandbox _sandbox;
+
+    public Action<string> NoMatchFallback { get; set; }
+    public TraceSource Logger { get; } = new TraceSource("Azure.FX.AI");
 
     public TextToCode(Type assistant)
     {
@@ -37,9 +41,6 @@ public class TextToCode
         _sandbox.AllowType(assistant);
     }
 
-    public Action<string> NoMatchFallback { get; set; }
-    public bool Log { get; set; } = false;
-
     public async Task<bool> ProcessAsync(string request)
     {
         int retries = 5;
@@ -60,10 +61,12 @@ public class TextToCode
                 return true;
             }
 
-            if (Log) Cli.WriteLine("EXECUTING: " + response, ConsoleColor.DarkBlue);
+            var logger = Logger;
+
+            if (logger!=default) logger.TraceInformation($"EXECUTING: {response}");
             var error = ExecutionRuntime.ExecuteMethodBody(response, _sandbox);
             if (error == null) return true;
-            if (Log) Cli.WriteLine("ERROR: " + error, ConsoleColor.DarkBlue);
+            if (logger != default) logger.TraceEvent(TraceEventType.Warning, 0, $"ERROR: {error}");
             prompt.Add($"I got the following error {error} when compiling the code. Can you fix the code you provided previously?", ChatRole.User);
         }
 

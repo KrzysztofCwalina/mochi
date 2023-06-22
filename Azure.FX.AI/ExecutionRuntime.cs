@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Collections.Generic;
+using System.IO;
+using System;
 
 namespace Mochi;
 

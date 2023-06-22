@@ -1,4 +1,3 @@
-Dispose generated assemblies
 allow continuous conversation
 allow custom enums in assistant APIs
 allow APIs returning information that can be fed back to AI
