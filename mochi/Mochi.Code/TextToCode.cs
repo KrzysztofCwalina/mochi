@@ -61,7 +61,7 @@ public class TextToCode
             }
 
             if (Log) Cli.WriteLine("EXECUTING: " + response, ConsoleColor.DarkBlue);
-            var error = ExecutionRuntime.ExecuteCode(response, _sandbox);
+            var error = ExecutionRuntime.ExecuteMethodBody(response, _sandbox);
             if (error == null) return true;
             if (Log) Cli.WriteLine("ERROR: " + error, ConsoleColor.DarkBlue);
             prompt.Add($"I got the following error {error} when compiling the code. Can you fix the code you provided previously?", ChatRole.User);
