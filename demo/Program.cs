@@ -22,7 +22,7 @@ while (true)
 public static class Assistant
 {
     private static AIServices s_ai = new AIServices();
-    private static List<(string task, string assignedTo)> s_tasks = new List<(string task, string assignedTo)>();
+    private static List<ToDo> s_tasks = new List<ToDo>();
 
     public static void Say(string message)
     {
@@ -32,7 +32,8 @@ public static class Assistant
 
     public static void Add(double x, double y) => Say((x + y).ToString());
 
-    public static void AddTodo(string task, string? assignedTo = default) => s_tasks.Add((task, assignedTo));
+    public static void AddTodo(string task, string? assignedTo = default, TodoPriority priority = TodoPriority.Default) 
+        => s_tasks.Add(new ToDo() { Task = task, AssignedTo = assignedTo, Priority = priority});
 
     public static void Exit() => Environment.Exit(0);
 
@@ -40,20 +41,34 @@ public static class Assistant
 
     public static void TellCurrentDate() => Say($"It's {DateTime.Now.ToString("d")}");
 
-    public static void ListTasks(string assignedTo = default)
+    public static void ListTasks(string? assignedTo = default)
     {
         foreach (var task in s_tasks)
         {
-            if (string.IsNullOrEmpty(assignedTo) || assignedTo.Equals(task.assignedTo))
+            if (string.IsNullOrEmpty(assignedTo) || assignedTo.Equals(task.AssignedTo))
             {
-                var taskMessage = task.task;
-                if (string.IsNullOrEmpty(assignedTo) && !string.IsNullOrEmpty(task.assignedTo))
-                    taskMessage += ". assigned to " + task.assignedTo.ToString();
+                var taskMessage = task.Task;
+                if (string.IsNullOrEmpty(assignedTo) && !string.IsNullOrEmpty(task.AssignedTo))
+                    taskMessage += ". assigned to " + task.AssignedTo;
 
                 Say(taskMessage);
             }
         }
     }
+}
+
+public enum TodoPriority
+{
+    Default = 0,
+    Low = 1,
+    High = 2
+}
+
+public struct ToDo
+{
+    public string Task { get; set; }
+    public string? AssignedTo { get; set; }
+    public TodoPriority Priority { get; set; } 
 }
 
 // tell time, tell date

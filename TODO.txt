@@ -1,5 +1,5 @@
+allow custom enums in assistant APIs: enums (and other dependncies) need to be in the schema
 allow continuous conversation
-allow custom enums in assistant APIs
 allow APIs returning information that can be fed back to AI
 
 Add the ability to specify persona
