@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure;
 using Azure.FX.AI;
-using Azure.FX.Tooling;
+using mochi.fx;
 using System.Diagnostics;
 
 var t2c = new TextToCode(typeof(Assistant));

@@ -2,18 +2,17 @@
 // Licensed under the MIT License.
 
 using Azure;
-using Azure.Data.Tables;
 using Azure.FX.AI;
-using Azure.FX.Tooling;
+using mochi.fx;
 using Microsoft.CognitiveServices.Speech;
 
 internal class Program
 {
-    public static readonly AIServices AI = new AIServices();
-    static readonly KeywordRecognitionModel keyword = KeywordRecognitionModel.FromFile("hey_mochi.table");
-    static readonly string storageConnectionString = ReadConfigurationSetting("MOCHI_STORAGE_CS");
-    private readonly static TableServiceClient tableService = new TableServiceClient(storageConnectionString);
-    public readonly static TableClient TasksTable = tableService.GetTableClient("mochitasks");
+    internal static readonly string mspdKey = ReadConfigurationSetting("MOCHI_MAPS_SHAREDKEY");
+    internal static readonly string storageConnectionString = ReadConfigurationSetting("MOCHI_STORAGE_CS");
+    internal static readonly KeywordRecognitionModel keyword = KeywordRecognitionModel.FromFile("hey_mochi.table");
+
+    internal static readonly AIServices AI = new AIServices();
 
     private static async Task Main(string[] args)
     {
@@ -52,20 +51,11 @@ internal class Program
     }
 }
 
-class ToDo : ITableEntity
-{
-    public string Task { get; set; }
-    public string AssignedTo { get; set; }
-    public int Priority { get; set; } = 2;
-
-    public string PartitionKey { get; set; } = "todo";
-    public string RowKey { get; set; } = Guid.NewGuid().ToString();
-    public DateTimeOffset? Timestamp { get; set; } = DateTimeOffset.UtcNow;
-    public ETag ETag { get; set; }
-}
-
 public static class Mochi
 {
+    static readonly WeatherClient s_weather = new WeatherClient(Program.mspdKey);
+    static readonly ToDoClient s_todos = new ToDoClient(Program.storageConnectionString);
+
     public static void Say(string message)
     {
         Cli.WriteLine(message, ConsoleColor.Green);
@@ -78,12 +68,12 @@ public static class Mochi
         var newTask = new ToDo();
         newTask.Task = task;
         newTask.AssignedTo = assignedTo;
-        Program.TasksTable.AddEntity(newTask);
+        s_todos.Add(newTask);
     }
 
     public static void ListTasks(string assignedTo = default)
     {
-        var tasks = Program.TasksTable.Query<ToDo>();
+        var tasks = s_todos.Get(assignedTo);
 
         foreach (var task in tasks)
         {
@@ -104,7 +94,7 @@ public static class Mochi
 
     public static void CurrentWeather(WeatherLocation location)
     {
-        (string phrase, int tempF) = Weather.GetCurrent(location);
+        (string phrase, int tempF) = s_weather.GetCurrent(location);
         Say($"it's {phrase}. {tempF} degrees Fahrenheit");
     }
     public static void CurrentWeather() => CurrentWeather(WeatherLocation.Redmond);

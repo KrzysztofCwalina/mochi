@@ -7,4 +7,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Azure.FX.AI\Azure.FX.AI.csproj" />
+    <ProjectReference Include="..\mochi.lib\mochi.lib.csproj" />
+  </ItemGroup>
+
 </Project>

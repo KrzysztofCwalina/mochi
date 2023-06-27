@@ -10,13 +10,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TODO.txt = TODO.txt
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{F8C62F0E-5017-4B1A-93A2-ECE95B9D9256}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mochi.tests", "mochi.tests\mochi.tests.csproj", "{F8C62F0E-5017-4B1A-93A2-ECE95B9D9256}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Azure.FX.AI", "Azure.FX.AI\Azure.FX.AI.csproj", "{9E744F90-E776-481D-B3F7-A6625461552D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "demo", "demo\demo.csproj", "{8D541A88-4964-44EF-8CA4-7B80E0C9602D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ai.demo", "ai.demo\ai.demo.csproj", "{8D541A88-4964-44EF-8CA4-7B80E0C9602D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "server", "server\server.csproj", "{32E28683-7735-4385-81FA-D70A41402606}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mochi.lib", "mochi.lib\mochi.lib.csproj", "{94E0BED5-9782-4D4F-9E2B-0D08F53F14E8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mochi.server", "mochi.server\mochi.server.csproj", "{C5459044-D6C4-437E-B75E-A7E622350BA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,10 +42,14 @@ Global
 		{8D541A88-4964-44EF-8CA4-7B80E0C9602D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D541A88-4964-44EF-8CA4-7B80E0C9602D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D541A88-4964-44EF-8CA4-7B80E0C9602D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{32E28683-7735-4385-81FA-D70A41402606}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{32E28683-7735-4385-81FA-D70A41402606}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{32E28683-7735-4385-81FA-D70A41402606}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{32E28683-7735-4385-81FA-D70A41402606}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94E0BED5-9782-4D4F-9E2B-0D08F53F14E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94E0BED5-9782-4D4F-9E2B-0D08F53F14E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94E0BED5-9782-4D4F-9E2B-0D08F53F14E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94E0BED5-9782-4D4F-9E2B-0D08F53F14E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5459044-D6C4-437E-B75E-A7E622350BA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5459044-D6C4-437E-B75E-A7E622350BA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5459044-D6C4-437E-B75E-A7E622350BA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5459044-D6C4-437E-B75E-A7E622350BA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
