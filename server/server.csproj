@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.FX" Version="0.0.22-alpha" />
+    <PackageReference Include="Azure.FX.Interfaces" Version="0.0.22-alpha" />
+  </ItemGroup>
+
+</Project>
