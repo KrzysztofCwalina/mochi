@@ -11,8 +11,9 @@ public class ToDoClient
     readonly TableServiceClient _tableService;
     readonly TableClient TasksTable;
 
-    public ToDoClient(string storageConnectionString)
+    public ToDoClient(SettingsClient settings)
     {
+        var storageConnectionString = settings.GetSecret("mochi-storage-cs");
         _tableService = new TableServiceClient(storageConnectionString);
         TasksTable = _tableService.GetTableClient("todos");
     }

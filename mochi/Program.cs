@@ -8,11 +8,9 @@ using Microsoft.CognitiveServices.Speech;
 
 internal class Program
 {
-    internal static readonly string mspdKey = ReadConfigurationSetting("MOCHI_MAPS_SHAREDKEY");
-    internal static readonly string storageConnectionString = ReadConfigurationSetting("MOCHI_STORAGE_CS");
+    internal static readonly SettingsClient Settings = new SettingsClient(new Uri("https://cme4194165e0f246c.vault.azure.net/"));
     internal static readonly KeywordRecognitionModel keyword = KeywordRecognitionModel.FromFile("hey_mochi.table");
-
-    internal static readonly AIServices AI = new AIServices();
+    internal static readonly AIServices AI = new AIServices(Settings);
 
     private static async Task Main(string[] args)
     {
@@ -38,23 +36,13 @@ internal class Program
             await mochi.ProcessAsync(recognizedSpeech);
         }
     }
-
-    internal static string ReadConfigurationSetting(string settingName)
-    {
-        var value = Environment.GetEnvironmentVariable(settingName);
-        if (value == null)
-        {
-            var message = $"configuration setting {settingName} not set.";
-            throw new Exception(message);
-        }
-        return value;
-    }
 }
 
 public static class Mochi
 {
-    static readonly WeatherClient s_weather = new WeatherClient(Program.mspdKey);
-    static readonly ToDoClient s_todos = new ToDoClient(Program.storageConnectionString);
+
+    static readonly WeatherClient s_weather = new WeatherClient(Program.Settings);
+    static readonly ToDoClient s_todos = new ToDoClient(Program.Settings);
 
     public static void Say(string message)
     {
@@ -94,8 +82,8 @@ public static class Mochi
 
     public static void CurrentWeather(WeatherLocation location)
     {
-        (string phrase, int tempF) = s_weather.GetCurrent(location);
-        Say($"it's {phrase}. {tempF} degrees Fahrenheit");
+        var weather = s_weather.GetCurrent(location);
+        Say($"it's {weather.Description}. {weather.TempF} degrees Fahrenheit");
     }
     public static void CurrentWeather() => CurrentWeather(WeatherLocation.Redmond);
 }

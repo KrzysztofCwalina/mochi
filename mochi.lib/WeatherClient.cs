@@ -11,12 +11,12 @@ public class WeatherClient
 
     string _sharedKey;
 
-    public WeatherClient(string sharedKey)
+    public WeatherClient(SettingsClient settings)
     {
-        _sharedKey = sharedKey;
+        _sharedKey = settings.GetSecret("mochi-maps-key");    
     }
 
-    public (string phrase, int tempF) GetCurrent(WeatherLocation location)
+    public (string Description, int TempF) GetCurrent(WeatherLocation location)
     {
         // https://learn.microsoft.com/en-us/rest/api/maps/weather/get-daily-forecast?tabs=HTTP
 

@@ -4,6 +4,7 @@
 using Azure.AI.OpenAI;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+using mochi.fx;
 using System;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -25,14 +26,14 @@ public class AIServices
     readonly OpenAIClient aiClient;
     readonly KeywordRecognizer keywordRecognizer;
 
-    public AIServices()
-    {
-        openAiEndpoint = ReadConfigurationSetting("MOCHI_AI_ENDPOINT");
-        openAiKey = ReadConfigurationSetting("MOCHI_AI_KEY");
-        openAiModelOrDeployment = ReadConfigurationSetting("MOCHI_AI_MODEL");
+    public AIServices(SettingsClient settings)
+    {    
+        openAiEndpoint = settings.GetSecret("mochi-ai-endpoint");
+        openAiKey = settings.GetSecret("mochi-ai-key");
+        openAiModelOrDeployment = settings.GetSecret("mochi-ai-model");
 
-        speechEndpoint = ReadConfigurationSetting("MOCHI_SPEECH_ENDPOINT");
-        speechKey = ReadConfigurationSetting("MOCHI_SPEECH_KEY");
+        speechEndpoint = settings.GetSecret("mochi-speech-endpoint");
+        speechKey = settings.GetSecret("mochi-speech-key");
 
         var speechConfiguration = SpeechConfig.FromEndpoint(new Uri(speechEndpoint), speechKey);
         speechConfiguration.SpeechSynthesisVoiceName = "en-US-JaneNeural";
@@ -63,17 +64,6 @@ public class AIServices
         ChatCompletions results = await aiClient.GetChatCompletionsAsync(openAiModelOrDeployment, options);
         var response = results.Choices.First().Message.Content;
         return response;
-    }
-
-    static string ReadConfigurationSetting(string settingName)
-    {
-        var value = Environment.GetEnvironmentVariable(settingName);
-        if (value == null)
-        {
-            var message = $"configuration setting {settingName} not set.";
-            throw new Exception(message);
-        }
-        return value;
     }
 }
 

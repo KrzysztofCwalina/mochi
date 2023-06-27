@@ -3,6 +3,7 @@
 
 using Azure.AI.OpenAI;
 using Azure.FX.AI.Runtime;
+using mochi.fx;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -11,8 +12,10 @@ namespace Azure.FX.AI;
 
 public class TextToCode
 {
+    static SettingsClient settings = new SettingsClient(new Uri("https://cme4194165e0f246c.vault.azure.net/"));
+
     const string NATURAL_LANGUAGE = "NATURAL_LANGUAGE:";
-    readonly AIServices ai = new AIServices();
+    readonly AIServices ai = new AIServices(settings);
     readonly Type _assistant;
     readonly string _context;
     readonly Sandbox _sandbox;
