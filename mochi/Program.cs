@@ -8,13 +8,13 @@ using Microsoft.CognitiveServices.Speech;
 
 internal class Program
 {
+    static readonly KeywordRecognitionModel keyword = KeywordRecognitionModel.FromFile("hey_mochi.table");
+
     internal static readonly SettingsClient Settings = new SettingsClient(new Uri("https://cme4194165e0f246c.vault.azure.net/"));
-    internal static readonly KeywordRecognitionModel keyword = KeywordRecognitionModel.FromFile("hey_mochi.table");
     internal static readonly AIServices AI = new AIServices(Settings);
 
     private static async Task Main(string[] args)
     {
-
         TextToCode mochi = new TextToCode(typeof(Mochi));
         mochi.NoMatchFallback = (message) => Mochi.Say(message);
 
@@ -40,7 +40,6 @@ internal class Program
 
 public static class Mochi
 {
-
     static readonly WeatherClient s_weather = new WeatherClient(Program.Settings);
     static readonly ToDoClient s_todos = new ToDoClient(Program.Settings);
 
@@ -76,9 +75,9 @@ public static class Mochi
         }
     }
 
-    public static void TellCurrentTime() => Say($"It's {DateTime.Now.ToString("t")}");
+    public static void TellCurrentTime() => Say($"It's {DateTime.Now:t}");
 
-    public static void TellCurrentDate() => Say($"It's {DateTime.Now.ToString("d")}");
+    public static void TellCurrentDate() => Say($"It's {DateTime.Now:d}");
 
     public static void CurrentWeather(WeatherLocation location)
     {

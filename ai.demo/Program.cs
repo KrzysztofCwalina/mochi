@@ -7,8 +7,9 @@ using System.Diagnostics;
 
 var t2c = new TextToCode(typeof(Assistant));
 t2c.NoMatchFallback = (message) => Assistant.Say(message);
-t2c.Logger.Switch.Level = SourceLevels.Information;
-t2c.Logger.Listeners.Add(new ConsoleTraceListener());
+
+//t2c.Logger.Switch.Level = SourceLevels.Information;
+//t2c.Logger.Listeners.Add(new ConsoleTraceListener());
 
 while (true)
 {
@@ -21,16 +22,12 @@ while (true)
 
 public static class Assistant
 {
-    public static void Say(string message)
-    {
-        Cli.WriteLine(message, ConsoleColor.Green);
-    }
-
-    public static void Add(double x, double y) => Say((x + y).ToString());
-
+    public static void Say(string message) => Cli.WriteLine(message, ConsoleColor.Green);
     public static void Exit() => Environment.Exit(0);
 
-    public static void TellCurrentTime() => Say($"It's {DateTime.Now.ToString("t")}");
+    public static void Add(double x, double y) => Say($"{x+y}");
 
-    public static void TellCurrentDate() => Say($"It's {DateTime.Now.ToString("d")}");
+    public static void TellCurrentTime() => Say($"It's {DateTime.Now:t}");
+
+    public static void TellCurrentDate() => Say($"It's {DateTime.Now:d}");
 }
