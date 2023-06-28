@@ -5,7 +5,7 @@ using Azure.Security.KeyVault.Secrets;
 using Azure.Data.AppConfiguration;
 using Azure.Identity;
 
-namespace mochi.fx;
+namespace mochi;
 
 public class SettingsClient
 {

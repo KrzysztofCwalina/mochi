@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using mochi.fx;
+using mochi;
 using NUnit.Framework;
 using System.Diagnostics;
 

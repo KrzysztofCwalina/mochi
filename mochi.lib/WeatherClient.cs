@@ -3,7 +3,7 @@
 
 using Azure;
 
-namespace mochi.fx;
+namespace mochi;
 
 public class WeatherClient
 {
@@ -16,13 +16,11 @@ public class WeatherClient
         _sharedKey = settings.GetSecret("mochi-maps-key");    
     }
 
-    public (string Description, int TempF) GetCurrent(WeatherLocation location)
+    public (string Description, int TempF) GetCurrent(double latitude, double longitude)
     {
         // https://learn.microsoft.com/en-us/rest/api/maps/weather/get-daily-forecast?tabs=HTTP
 
-        if (!coor.TryGetValue(location, out var coordinates)){
-            coordinates = "47.67, -122.12"; // Redmond, WA
-        }
+        var coordinates = $"{latitude}, {longitude}";
         var uri = $"https://atlas.microsoft.com/weather/currentConditions/json?api-version=1.1&subscription-key={_sharedKey}&query={coordinates}&unit=imperial";
         var message = new HttpRequestMessage(HttpMethod.Get, uri);
         message.Headers.Add("x-ms-client-id", "8e426f23-f50b-4eb7-ae88-0b33da5904d3");
@@ -34,27 +32,4 @@ public class WeatherClient
         var tempF = (int)(double)weather.Temperature.Value;
         return (phrase, tempF);
     }
-
-    static readonly Dictionary<WeatherLocation, string> coor = new Dictionary<WeatherLocation, string>(
-        new KeyValuePair<WeatherLocation, string>[] {
-            new KeyValuePair<WeatherLocation, string>(WeatherLocation.Redmond, "47.67, -122.12"),
-            new KeyValuePair<WeatherLocation, string>(WeatherLocation.LaQuinta, "33.66, -116.30"),
-            new KeyValuePair<WeatherLocation, string>(WeatherLocation.Warsaw, "52.22, 21.01"),
-            new KeyValuePair<WeatherLocation, string>(WeatherLocation.Pulawy, "51.25, 21.58"),
-            new KeyValuePair<WeatherLocation, string>(WeatherLocation.Seoul, "37.53, 127.02"),
-            new KeyValuePair<WeatherLocation, string>(WeatherLocation.LosAngeles, "34.05, -118.24"),
-            new KeyValuePair<WeatherLocation, string>(WeatherLocation.SanLouisObispo, "35.27, -120.68"),
-        }
-    );
-}
-
-public enum WeatherLocation
-{
-    Redmond,        // "47.67, -122.12"
-    LaQuinta,       // "33.66, -116.30"
-    Warsaw,         // "52.22, 21.01"
-    Pulawy,         // "51.25, 21.58"
-    Seoul,          // "37.53, 127.02"
-    LosAngeles,     // "34.05, -118.24"
-    SanLouisObispo  // "35.27, -120.68"
 }

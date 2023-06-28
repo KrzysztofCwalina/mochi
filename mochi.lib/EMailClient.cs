@@ -1,12 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 
-namespace mochi.fx;
+namespace mochi;
 
 public class EMailClient
 {

@@ -4,7 +4,7 @@
 using Azure;
 using Azure.Data.Tables;
 
-namespace mochi.fx;
+namespace mochi;
 
 public class ToDoClient
 {

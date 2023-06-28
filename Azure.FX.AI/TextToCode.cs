@@ -3,7 +3,7 @@
 
 using Azure.AI.OpenAI;
 using Azure.FX.AI.Runtime;
-using mochi.fx;
+using mochi;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -28,6 +28,7 @@ public class TextToCode
         _assistant = assistant;
 
         string api = ApiLister.CreateApiListing(_assistant);
+        Logger.TraceInformation(api);
 
         // this is the OpenAI system message
         _context = $$"""

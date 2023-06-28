@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Azure.FX.AI;
-using mochi.fx;
+using mochi;
 using System.Diagnostics;
 
 SettingsClient settings = new SettingsClient(new Uri("https://cme4194165e0f246c.vault.azure.net/"));

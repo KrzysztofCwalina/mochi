@@ -4,7 +4,7 @@
 using Azure.AI.OpenAI;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
-using mochi.fx;
+using mochi;
 using System;
 using System.Linq;
 using System.Text.Json.Serialization;
