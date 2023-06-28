@@ -54,7 +54,11 @@ public class AIServices
         return result.Text;
     }
 
-    public void SpeakAsync(string response) => synthetizer.SpeakTextAsync(response);
+    public void SpeakAsync(string response, bool blocking = true)
+    {
+        var task = synthetizer.SpeakTextAsync(response);
+        if (blocking) task.GetAwaiter().GetResult();
+    }
 
     public async Task StopSpeakingAsync() => await synthetizer.StopSpeakingAsync();
 

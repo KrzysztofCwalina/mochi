@@ -50,7 +50,7 @@ public static class Mochi
     {
         Cli.WriteLine(message, ConsoleColor.Green);
         Cli.WriteLine("speaking ...");
-        Program.AI.SpeakAsync(message);
+        Program.AI.SpeakAsync(message, blocking: false);
     }
 
     public static void AddTask(string task, string assignedTo = default)
@@ -80,8 +80,21 @@ public static class Mochi
 
     public static void SendEMail(EmailReceipient to, string message, string subject = "from Mochi")
     {
-        var address = Mappings.EMailAddresses[to];
-        s_email.Send(address, subject, message);
+        var receipeint = Mappings.EMailAddresses[to];
+        Program.AI.SpeakAsync($"Sending: {message} to {receipeint}. Do you want me to proceed?", blocking: true);
+        string response = Program.AI.RecognizeFromMicrophoneAsync().GetAwaiter().GetResult();
+        if (response.StartsWith("yes", StringComparison.OrdinalIgnoreCase) ||
+            response.StartsWith("yup", StringComparison.OrdinalIgnoreCase) ||
+            response.StartsWith("certainly", StringComparison.OrdinalIgnoreCase) ||
+            response.StartsWith("go ahead", StringComparison.OrdinalIgnoreCase) ||
+            response.StartsWith("proceed", StringComparison.OrdinalIgnoreCase)
+        )
+        {
+            s_email.Send(receipeint, subject, message);
+            Say("Sent.");
+        }
+        else
+            Say("Cancelled.");
     }
     public static void TellCurrentTime() => Say($"It's {DateTime.Now:t}");
 

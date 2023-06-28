@@ -1,5 +1,3 @@
-Schema enums need to be sent to AI
-
 allow continuous conversation
 allow APIs returning information that can be fed back to AI
 
